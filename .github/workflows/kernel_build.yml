@@ -36,7 +36,6 @@ jobs:
           
       - name: Mulai Kompilasi Kernel
         run: |
-          # GITHUB_WORKSPACE adalah path absolut dari runner Github
           export PATH="$GITHUB_WORKSPACE/clang/bin:$PATH"
           cd kernel-source
           
@@ -46,9 +45,15 @@ jobs:
           export KBUILD_BUILD_HOST="GitHubActions"
           
           echo "[*] Konfigurasi defconfig..."
+          # Gabungin base dan fragment config
           make O=out CC=clang vendor/xiaomi/sm8250-common.config vendor/xiaomi/munch.config
           
+          echo "[*] Mematikan COMPAT_VDSO biar Clang gak rewel..."
+          # Script bawaan kernel buat ngedit .config secara otomatis
+          ./scripts/config --file out/.config --disable CONFIG_COMPAT_VDSO
+          
           echo "[*] Proses Build Utama Berjalan..."
+          # Tambahin LLVM=1 dan LLVM_IAS=1 biar Neutron Clang jalan sempurna
           make O=out \
               ARCH=arm64 \
               CC=clang \
@@ -60,6 +65,8 @@ jobs:
               STRIP=llvm-strip \
               CROSS_COMPILE=aarch64-linux-gnu- \
               CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+              LLVM=1 \
+              LLVM_IAS=1 \
               -j$(nproc --all)
               
       - name: Upload Hasil Build (Artifact)
