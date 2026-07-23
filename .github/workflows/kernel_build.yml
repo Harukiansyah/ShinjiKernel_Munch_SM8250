@@ -33,8 +33,7 @@ jobs:
           echo "[*] Injecting KernelSU-Next..."
           cd kernel-source
           curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s legacy
-          
-      - name: Mulai Kompilasi Kernel
+        
       - name: Mulai Kompilasi Kernel
         run: |
           export PATH="$GITHUB_WORKSPACE/clang/bin:$PATH"
