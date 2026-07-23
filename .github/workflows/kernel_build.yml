@@ -35,6 +35,7 @@ jobs:
           curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s legacy
           
       - name: Mulai Kompilasi Kernel
+      - name: Mulai Kompilasi Kernel
         run: |
           export PATH="$GITHUB_WORKSPACE/clang/bin:$PATH"
           cd kernel-source
@@ -48,10 +49,16 @@ jobs:
           make O=out CC=clang vendor/xiaomi/sm8250-common.config vendor/xiaomi/munch.config
           
           echo "[*] Injeksi Konfigurasi Anti-Error..."
-          # Nyalain COMPAT biar filter.h gak error
+          # Fix VDSO dan COMPAT sebelumnya
           ./scripts/config --file out/.config --enable CONFIG_COMPAT
-          # Matiin COMPAT_VDSO biar compiler Clang gak nangis baca assembly 32-bit
           ./scripts/config --file out/.config --disable CONFIG_COMPAT_VDSO
+          
+          # TUNTASKAN ERROR RCU TASKS & SYARAT MUTLAK KSU LEGACY + BPF
+          ./scripts/config --file out/.config --enable CONFIG_TASKS_RCU
+          ./scripts/config --file out/.config --enable CONFIG_TASKS_TRACE_RCU
+          ./scripts/config --file out/.config --enable CONFIG_KPROBES
+          ./scripts/config --file out/.config --enable CONFIG_KPROBE_EVENTS
+          ./scripts/config --file out/.config --enable CONFIG_BPF_EVENTS
           
           echo "[*] Proses Build Utama Berjalan..."
           make O=out \
