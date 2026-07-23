@@ -45,15 +45,15 @@ jobs:
           export KBUILD_BUILD_HOST="GitHubActions"
           
           echo "[*] Konfigurasi defconfig..."
-          # Gabungin base dan fragment config
           make O=out CC=clang vendor/xiaomi/sm8250-common.config vendor/xiaomi/munch.config
           
-          echo "[*] Mematikan COMPAT_VDSO biar Clang gak rewel..."
-          # Script bawaan kernel buat ngedit .config secara otomatis
+          echo "[*] Injeksi Konfigurasi Anti-Error..."
+          # Nyalain COMPAT biar filter.h gak error
+          ./scripts/config --file out/.config --enable CONFIG_COMPAT
+          # Matiin COMPAT_VDSO biar compiler Clang gak nangis baca assembly 32-bit
           ./scripts/config --file out/.config --disable CONFIG_COMPAT_VDSO
           
           echo "[*] Proses Build Utama Berjalan..."
-          # Tambahin LLVM=1 dan LLVM_IAS=1 biar Neutron Clang jalan sempurna
           make O=out \
               ARCH=arm64 \
               CC=clang \
@@ -68,7 +68,7 @@ jobs:
               LLVM=1 \
               LLVM_IAS=1 \
               -j$(nproc --all)
-              
+
       - name: Upload Hasil Build (Artifact)
         if: success()
         uses: actions/upload-artifact@v4
