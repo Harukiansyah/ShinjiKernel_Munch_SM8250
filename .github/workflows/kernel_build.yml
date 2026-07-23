@@ -46,7 +46,7 @@ jobs:
           export KBUILD_BUILD_HOST="GitHubActions"
           
           echo "[*] Konfigurasi defconfig..."
-          make O=out CC=clang munch_defconfig 
+          make O=out CC=clang vendor/xiaomi/sm8250-common.config vendor/xiaomi/munch.config
           
           echo "[*] Proses Build Utama Berjalan..."
           make O=out \
